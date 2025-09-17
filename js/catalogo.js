@@ -1,0 +1,125 @@
+
+const produtos = [
+  {
+    id: 1,
+    nome: "Smartphone X",
+    preco: 20000.00,
+    categoria: "eletronicos",
+    imagem: "img/smartphone.jpg",
+    descricao: "Smartphone moderno com ótima performance."
+  },
+  {
+    id: 2,
+    nome: "Livro JavaScript",
+    preco: 59.90,
+    categoria: "livros",
+    imagem: "img/livro.jpg",
+    descricao: "Aprenda JS de forma prática."
+  },
+  {
+    id: 3,
+    nome: "Camiseta Básica",
+    preco: 49.90,
+    categoria: "roupas",
+    imagem: "img/camiseta.jpg",
+    descricao: "Camiseta confortável e estilosa."
+  },
+  {
+    id: 4,
+    nome: "Fone Bluetooth",
+    preco: 25.00,
+    categoria: "eletronicos",
+    imagem: "img/fone.jpg",
+    descricao: "Fone sem fio com ótima qualidade de som.",
+  },
+  {
+  id: 5,
+  nome: "Caneca Personalizada",
+  preco: 35.00,
+  categoria: "outros",
+  imagem: "img/caneca.jpg",
+  descricao: "Caneca divertida para o dia a dia."
+},
+{
+  id: 6,
+  nome: "Notebook Gamer",
+  preco: 5500.00,
+  categoria: "eletronicos",
+  imagem: "img/notebook.jpg",
+  descricao: "Notebook potente para jogos e trabalho."
+},
+{
+  id: 7,
+  nome: "Código Limpo: Habilidades Práticas do Agile Software",
+  preco: 89.90,
+  categoria: "livros",
+  imagem: "img/livro-2.jpg",
+  descricao: "Aprenda boas práticas da programação."
+},
+{
+  id: 8,
+  nome: "Camiseta Flamengo",
+  preco: 149.90,
+  categoria: "roupas",
+  imagem: "img/camiseta-flamengo.jpg",
+  descricao: "Camiseta estilosa e confortável do seu time. "
+}
+];
+
+
+const catalogo = document.getElementById("catalogo");
+const search = document.getElementById("search");
+const filter = document.getElementById("filter");
+const sort = document.getElementById("sort");
+
+
+function renderizarProdutos(lista) {
+  catalogo.innerHTML = "";
+  lista.forEach(produto => {
+    const card = document.createElement("div");
+    card.classList.add("card");
+    card.innerHTML = `
+      <img src="${produto.imagem}" alt="${produto.nome}">
+      <h3>${produto.nome}</h3>
+      <p>R$ ${produto.preco.toFixed(2)}</p>
+      <button onclick="verDetalhe(${produto.id})">Ver Detalhes</button>
+    `;
+    catalogo.appendChild(card);
+  });
+}
+
+
+function verDetalhe(id) {
+  const produto = produtos.find(p => p.id === id);
+  alert(`Produto: ${produto.nome}\nPreço: R$ ${produto.preco.toFixed(2)}\nDescrição: ${produto.descricao}`);
+}
+
+
+function filtrar() {
+  const texto = search.value.toLowerCase();
+  const categoriaSelecionada = filter.value;
+  const criterio = sort.value;
+
+  let filtrados = produtos.filter(produto => {
+    const matchNome = produto.nome.toLowerCase().includes(texto);
+    const matchCategoria = categoriaSelecionada === "all" || produto.categoria === categoriaSelecionada;
+    return matchNome && matchCategoria;
+  });
+
+  
+  if (criterio === "nome") {
+    filtrados.sort((a, b) => a.nome.localeCompare(b.nome));
+  } else if (criterio === "preco") {
+    filtrados.sort((a, b) => a.preco - b.preco);
+  }
+
+  renderizarProdutos(filtrados);
+}
+
+
+search.addEventListener("input", filtrar);
+filter.addEventListener("change", filtrar);
+sort.addEventListener("change", filtrar);
+
+
+renderizarProdutos(produtos);

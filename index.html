@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-commerce - Catálogo</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Meu E-commerce</h1>
+
+   
+    <input type="text" id="search" placeholder="Buscar produto...">
+
+    
+    <select id="filter">
+      <option value="all">Todas categorias</option>
+      <option value="eletronicos">Eletrônicos</option>
+      <option value="livros">Livros</option>
+      <option value="roupas">Roupas</option>
+    </select>
+
+    
+    <select id="sort">
+      <option value="default">Ordenar</option>
+      <option value="nome">Nome</option>
+      <option value="preco">Preço</option>
+    </select>
+  </header>
+
+  <main>
+    <div id="catalogo" class="grid"></div>
+  </main>
+
+  <script src="js/catalogo.js"></script>
+</body>
+</html>
