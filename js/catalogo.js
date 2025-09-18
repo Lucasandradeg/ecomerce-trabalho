@@ -2,11 +2,11 @@
 const produtos = [
   {
     id: 1,
-    nome: "Smartphone X",
+    nome: "Apple iPhone 17 Pro Max",
     preco: 20000.00,
     categoria: "eletronicos",
     imagem: "img/smartphone.jpg",
-    descricao: "Smartphone moderno com ótima performance."
+    descricao: "Apple iPhone 17 Pro Max 512GB 6,9"
   },
   {
     id: 2,
