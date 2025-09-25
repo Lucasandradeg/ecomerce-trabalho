@@ -10,12 +10,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const subtotalSpan = document.getElementById("subtotal");
     const totalSpan = document.getElementById("total");
 
-    // Pega os itens do carrinho
+    
     const carrinho = (typeof Cart !== "undefined")
         ? Cart.getItems()
         : JSON.parse(localStorage.getItem("carrinho")) || [];
 
-    // Atualiza a lista do resumo
+    
     function atualizarResumo() {
         listaProdutos.innerHTML = "";
         let subtotal = 0;
@@ -33,14 +33,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     atualizarResumo();
 
-    // Formata o CEP enquanto digita
+    
     cepInput.addEventListener("input", () => {
         let v = cepInput.value.replace(/\D/g, "");
         if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5, 8);
         cepInput.value = v;
     });
 
-    // Busca o endereço pelo CEP
+    
     cepInput.addEventListener("blur", async () => {
         const cep = cepInput.value.replace(/\D/g, "");
         if (cep.length !== 8) {
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!resp.ok) throw new Error("Erro de rede");
 
             const data = await resp.json();
-            console.log("Resposta da API ViaCEP:", data); // 🔍 Depuração
+            console.log("Resposta da API ViaCEP:", data); 
 
             if (data.erro) {
                 showMsg("CEP não encontrado. Preencha manualmente.");
@@ -74,12 +74,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Função de mensagens
+   
     function showMsg(texto) {
         msg.textContent = texto;
     }
 
-    // Finalizar compra
+    
     const form = document.getElementById("checkout-form");
     form.addEventListener("submit", (e) => {
         e.preventDefault();
