@@ -1,129 +1,141 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalhes do Produto</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<main class="container" id="content">
-    <a href="index.html" class="btn btn-outline back-link">← Voltar ao catálogo</a>
+<div class="container">
+    <header>
+        <h1><a href="index.html">Shop Fácil</a></h1>
+        <a href="checkout.html" id="carrinho-link" class="btn btn-secondary">Carrinho (<span id="cart-count">0</span>)</a>
+    </header>
+    <main>
+        <section id="produto-section">
+            <p>Carregando produto...</p>
+        </section>
+    </main>
+</div>
+    
+    <script src="js/carrinho.js"></script>
+    <script src="js/catalogo.js"></script>
 
-    <div id="cart-status" aria-live="polite"></div>
-
-    <section id="produto-section" class="product-grid" aria-busy="true" aria-live="polite">
-
-    </section>
-</main>
-
-
-<script src="js/carrinho.js"></script>
-
-<script>
-    (function(){
-        const BRL = (n)=> 'R$ ' + Number(n||0).toFixed(2);
-
-        function getParam(name){
-            const url = new URL(window.location.href);
-            return url.searchParams.get(name);
-        }
-
-        async function loadProdutosFromCatalogo(){
-            const res = await fetch('js/catalogo.js', {cache:'no-store'});
-            const text = await res.text();
-
-            const start = text.indexOf('const produtos =');
-            if(start === -1) throw new Error('Não encontrei definição de "const produtos =" em catalogo.js');
-
-            const after = text.slice(start);
-            const openIdx = after.indexOf('[');
-            if(openIdx === -1) throw new Error('Não encontrei "[" do array de produtos');
-
-            let i = openIdx + 1, depth = 1;
-            while (i < after.length && depth > 0){
-                const ch = after[i];
-                if(ch === '[') depth++;
-                else if(ch === ']') depth--;
-                i++;
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Função para atualizar o contador (precisa estar aqui para funcionar nesta página)
+            function atualizarContadorCarrinho() {
+                const cartCount = document.getElementById("cart-count");
+                if (cartCount && typeof Cart !== 'undefined') {
+                    const totalItems = Cart.getItems().reduce((sum, item) => sum + item.quantidade, 0);
+                    cartCount.textContent = totalItems;
+                }
             }
-            if(depth !== 0) throw new Error('Falha ao balancear colchetes do array de produtos');
 
-            const arrayLiteral = after.slice(openIdx, i);
-            const produtos = Function('"use strict";return (' + arrayLiteral + ')')();
-            if(!Array.isArray(produtos)) throw new Error('Produtos extraídos não são um array');
-            return produtos;
-        }
+            const BRL = n => 'R$ ' + Number(n || 0).toFixed(2);
 
-        function notFound(msg){
-            document.getElementById('produto-section').innerHTML = `
-          <div>
-            <h1 tabindex="-1">${msg}</h1>
-            <p><a href="index.html" class="btn btn-outline">Voltar ao catálogo</a></p>
-          </div>`;
-            const h1 = document.querySelector('#produto-section h1'); h1 && h1.focus();
-        }
+            function getParam(name) {
+                return new URL(window.location.href).searchParams.get(name);
+            }
 
-        function render(prod){
-            const sec = document.getElementById('produto-section');
-            sec.setAttribute('aria-busy','false');
-            sec.innerHTML = `
-          <div>
-            <img class="img" src="${prod.imagem || ''}" alt="${prod.nome || 'Produto'}">
-          </div>
-          <div>
-            <h1 id="produto-titulo" tabindex="-1" class="produto-titulo">${prod.nome || 'Produto'}</h1>
-            <p class="produto-preco">${BRL(prod.preco)}</p>
-            <p class="produto-desc">${prod.descricao || 'Sem descrição.'}</p>
+            function notFound(msg) {
+                const sec = document.getElementById('produto-section');
+                sec.innerHTML = `
+                  <div>
+                    <h1>${msg}</h1>
+                    <p><a href="index.html">Voltar ao catálogo</a></p>
+                  </div>
+                `;
+            }
 
-            <div class="qty-wrap">
-              <label for="qty">Quantidade:</label>
-              <button type="button" id="qty-dec" aria-label="Diminuir quantidade">−</button>
-              <input id="qty" type="number" min="1" value="1" aria-label="Quantidade">
-              <button type="button" id="qty-inc" aria-label="Aumentar quantidade">+</button>
-            </div>
+            function render(prod) {
+                const sec = document.getElementById('produto-section');
+                sec.innerHTML = ''; // Limpa o "Carregando..."
+                
+                const divImg = document.createElement('div');
+                divImg.className = 'img-container';
+                const img = document.createElement('img');
+                img.src = prod.imagem;
+                img.alt = prod.nome;
+                divImg.appendChild(img);
 
-            <div class="actions-line">
-              <button id="btn-add" class="btn btn-primary">Adicionar ao carrinho</button>
-              <a href="checkout.html" class="btn btn-outline">Ir para o checkout</a>
-            </div>
-          </div>
-        `;
+                const divDetails = document.createElement('div');
+                divDetails.className = 'details-container';
+                
+                const h1 = document.createElement('h1');
+                h1.id = 'produto-titulo';
+                h1.textContent = prod.nome;
 
-            document.getElementById('produto-titulo')?.focus();
+                const pPreco = document.createElement('p');
+                pPreco.className = 'preco';
+                pPreco.textContent = BRL(prod.preco);
 
-            const qty = document.getElementById('qty');
-            document.getElementById('qty-inc').addEventListener('click', ()=> qty.value = String(Math.max(1, Number(qty.value||1)+1)));
-            document.getElementById('qty-dec').addEventListener('click', ()=> qty.value = String(Math.max(1, Number(qty.value||1)-1)));
+                const pDescricao = document.createElement('p');
+                pDescricao.className = 'descricao';
+                pDescricao.textContent = prod.descricao;
 
-            document.getElementById('btn-add').addEventListener('click', ()=>{
-                const quantidade = Math.max(1, Number(qty.value||1));
-                window.Cart.add({
-                    id: prod.id,
-                    nome: prod.nome,
-                    preco: Number(prod.preco||0),
-                    imagem: prod.imagem || '',
-                    quantidade
+                const qtyWrap = document.createElement('div');
+                qtyWrap.className = 'qty-wrap';
+                const qtyLabel = document.createElement('label');
+                qtyLabel.htmlFor = 'qty';
+                qtyLabel.textContent = 'Quantidade:';
+                const btnDec = document.createElement('button');
+                btnDec.type = 'button';
+                btnDec.textContent = '−';
+                const inputQty = document.createElement('input');
+                inputQty.id = 'qty';
+                inputQty.type = 'number';
+                inputQty.min = '1';
+                inputQty.value = '1';
+                const btnInc = document.createElement('button');
+                btnInc.type = 'button';
+                btnInc.textContent = '+';
+                qtyWrap.append(qtyLabel, btnDec, inputQty, btnInc);
+
+                const actionsWrap = document.createElement('div');
+                actionsWrap.className = 'actions';
+                const btnAdd = document.createElement('button');
+                btnAdd.textContent = 'Adicionar ao carrinho';
+                const linkCheckout = document.createElement('a');
+                linkCheckout.href = 'checkout.html';
+                linkCheckout.className = 'btn btn-secondary';
+                linkCheckout.textContent = 'Ir para o checkout';
+                actionsWrap.append(btnAdd, linkCheckout);
+
+                divDetails.append(h1, pPreco, pDescricao, qtyWrap, actionsWrap);
+                sec.append(divImg, divDetails);
+                
+                btnInc.addEventListener('click', () => {
+                    inputQty.value = String(Number(inputQty.value) + 1);
                 });
-                const live = document.getElementById('cart-status');
-                if(live) live.textContent = 'Produto adicionado ao carrinho.';
-            });
-        }
-
-        (async function boot(){
-            try{
-                const id = getParam('id');
-                if(!id) return notFound('Produto não informado.');
-                const lista = await loadProdutosFromCatalogo();
-                const prod = lista.find(p => String(p.id) === String(id));
-                if(!prod) return notFound('Produto não encontrado.');
-                render(prod);
-            }catch(err){
-                console.error(err);
-                notFound('Falha ao carregar produto.');
+                btnDec.addEventListener('click', () => {
+                    inputQty.value = String(Math.max(1, Number(inputQty.value) - 1));
+                });
+                btnAdd.addEventListener('click', () => {
+                    const quantidade = Number(inputQty.value);
+                    Cart.add({ ...prod, quantidade: quantidade });
+                    atualizarContadorCarrinho();
+                    alert('Produto adicionado ao carrinho.');
+                });
             }
-        })();
-    })();
-</script>
+            
+            // Lógica principal da página
+            const id = getParam('id');
+            if (!id || !window.produtos) {
+                notFound('Produto não encontrado ou lista de produtos indisponível.');
+                return;
+            }
+            
+            const prod = window.produtos.find(p => String(p.id) === String(id));
+            if (!prod) {
+                notFound('Produto não encontrado.');
+                return;
+            }
+            
+            render(prod);
+            atualizarContadorCarrinho();
+        });
+    </script>
 </body>
 </html>
