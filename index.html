@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Meu E-Commerce</title>
+    <link rel="stylesheet" href="css/style.css?v=3" />
+</head>
+<body>
+<header class="lp-header">
+    <nav class="lp-nav">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Meu E-Commerce</span>
+    </nav>
+</header>
+
+<section class="hero">
+    <div class="hero-inner">
+        <h1 class="hero-title">Meu E-Commerce</h1>
+        <p class="hero-subtitle">Produtos selecionados, entrega rápida e experiência moderna.</p>
+
+
+        <div class="toolbar">
+            <input type="text" id="search" placeholder="Buscar produto..." aria-label="Buscar produto" />
+            <select id="filter" aria-label="Filtrar por categoria">
+                <option value="all">Todas categorias</option>
+                <option value="eletronicos">Eletrônicos</option>
+                <option value="livros">Livros</option>
+                <option value="roupas">Roupas</option>
+                <option value="outros">Outros</option>
+            </select>
+
+            <select id="sort" aria-label="Ordenar">
+                <option value="default">Ordenar</option>
+                <option value="nome">Nome</option>
+                <option value="preco">Preço</option>
+            </select>
+
+
+            <a href="carrinho.html" class="cart-link" aria-label="Abrir carrinho">
+                <svg class="cart-icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.44A2 2 0 0 0 10 19h9v-2h-9l1.1-2h7.45a2 2 0 0 0 1.79-1.11l3.58-7.16A1 1 0 0 0 23 4h-16zM7 20a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 .001 4A2 2 0 0 0 17 20z"/>
+                </svg>
+                <span id="cart-badge" class="cart-badge" aria-live="polite">0</span>
+            </a>
+        </div>
+
+
+        <ul class="hero-tags" aria-label="Categorias em destaque">
+            <li><span class="tag tag-eletronicos">Eletrônicos</span></li>
+            <li><span class="tag tag-livros">Livros</span></li>
+            <li><span class="tag tag-roupas">Roupas</span></li>
+            <li><span class="tag tag-outros">Outros</span></li>
+        </ul>
+    </div>
+</section>
+
+<main class="lp-main">
+    <div id="catalogo" class="grid"></div>
+</main>
+
+
+<script src="js/carrinho.js"></script>
+<script src="js/catalogo.js"></script>
+<script>
+    (function () {
+        function syncBadge() {
+            const state = window.Cart ? window.Cart.getState() : {count: 0};
+            const badge = document.getElementById('cart-badge');
+            if (badge) badge.textContent = String(state.count || 0);
+        }
+        syncBadge();
+        window.AppBus = window.AppBus || new EventTarget();
+        window.AppBus.addEventListener('carrinho:atualizado', syncBadge);
+    })();
+</script>
+</body>
+</html>

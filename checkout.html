@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1><a href="index.html">Shop Fácil</a></h1>
+    </header>
+    <main class="checkout-main">
+        <div id="carrinho-summary">
+            <h2>Resumo do Pedido</h2>
+            <ul id="lista-produtos"></ul>
+            <p>Subtotal: R$ <span id="subtotal">0.00</span></p>
+            <p><strong>Total: R$ <span id="total">0.00</span></strong></p>
+        </div>
+
+        <form id="checkout-form">
+            <h3>Endereço de Entrega</h3>
+            <div>
+                <label for="cep">CEP:</label>
+                <input type="text" id="cep" placeholder="00000-000" required>
+                <span id="cep-msg" aria-live="assertive"></span>
+            </div>
+            <div>
+                <label for="logradouro">Rua:</label>
+                <input type="text" id="logradouro" required>
+            </div>
+            <div>
+                <label for="numero">Número:</label>
+                <input type="text" id="numero" required>
+            </div>
+            <div>
+                <label for="bairro">Bairro:</label>
+                <input type="text" id="bairro" required>
+            </div>
+            <div>
+                <label for="cidade">Cidade:</label>
+                <input type="text" id="cidade" required>
+            </div>
+            <div>
+                <label for="uf">UF:</label>
+                <input type="text" id="uf" maxlength="2" required>
+            </div>
+            <button type="submit">Finalizar Compra</button>
+        </form>
+    </main>
+</div>
+    <script src="js/carrinho.js"></script>
+    <script src="js/checkout.js"></script>
+</body>
+</html>
