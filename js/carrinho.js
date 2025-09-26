@@ -1,38 +1,51 @@
-const Cart = {
-  save(carrinho) {
-    localStorage.setItem("carrinho", JSON.stringify(carrinho));
-  },
-
-  add(produto) {
-    const carrinho = this.getItems();
-    const existing = carrinho.find(p => p.id === produto.id);
-    const quantidadeToAdd = produto.quantidade || 1;
-
-    if (existing) {
-      existing.quantidade += quantidadeToAdd;
-    } else {
-      carrinho.push({ ...produto, quantidade: quantidadeToAdd });
+class Carrinho {
+    constructor() {
+        this.itens = this.lerDoLocalStorage();
     }
 
-    this.save(carrinho);
-  },
+    lerDoLocalStorage() {
+        return JSON.parse(localStorage.getItem("carrinho")) || [];
+    }
 
-  remove(id) {
-    let carrinho = this.getItems();
-    carrinho = carrinho.filter(p => p.id !== id);
-    this.save(carrinho);
-  },
+    salvarNoLocalStorage() {
+        localStorage.setItem("carrinho", JSON.stringify(this.itens));
+    }
 
-  clear() {
-    this.save([]);
-  },
+    add(produto) {
+        this.itens = this.lerDoLocalStorage(); 
+        const existing = this.itens.find(p => p.id === produto.id);
+        const quantidadeToAdd = produto.quantidade || 1;
 
-  getItems() {
-    return JSON.parse(localStorage.getItem("carrinho")) || [];
-  },
+        if (existing) {
+            existing.quantidade += quantidadeToAdd;
+        } else {
+            this.itens.push({ ...produto, quantidade: quantidadeToAdd });
+        }
+        this.salvarNoLocalStorage();
+    }
 
-  getTotal() {
-    const carrinho = this.getItems();
-    return carrinho.reduce((sum, p) => sum + (p.preco || 0) * p.quantidade, 0);
-  }
-};
+    remove(id) {
+        this.itens = this.lerDoLocalStorage();
+        this.itens = this.itens.filter(p => p.id !== id);
+        this.salvarNoLocalStorage();
+    }
+
+    clear() {
+        this.itens = [];
+        this.salvarNoLocalStorage();
+    }
+
+    getItems() {
+        this.itens = this.lerDoLocalStorage();
+        return this.itens;
+    }
+
+    getTotal() {
+        this.itens = this.lerDoLocalStorage();
+        return this.itens.reduce((sum, p) => sum + (p.preco || 0) * p.quantidade, 0);
+    }
+}
+
+
+const Cart = new Carrinho();
+window.Cart = Cart;

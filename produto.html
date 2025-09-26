@@ -7,21 +7,38 @@
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-<main class="container" id="content">
-    <a href="index.html" class="btn btn-outline back-link">← Voltar ao catálogo</a>
+<div class="container">
+    <header class="lp-header">
+        <nav class="lp-nav">
+            <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
+                <span class="brand-dot"></span>
+                <span class="brand-name">Meu E-Commerce</span>
+            </a>
+        </nav>
+        <a href="checkout.html" class="cart-link" aria-label="Abrir carrinho">
+             <svg class="cart-icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor" d="M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75L7.2,14.64L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2H1V2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z"/>
+             </svg>
+             <span id="cart-badge" class="cart-badge" aria-live="polite">0</span>
+        </a>
+    </header>
 
-    <div id="cart-status" aria-live="polite"></div>
+    <main id="content">
+        <a href="index.html" class="btn btn-secondary back-link" style="margin-bottom: 2rem; display: inline-block;">← Voltar ao catálogo</a>
 
-    <section id="produto-section" class="product-grid" aria-busy="true" aria-live="polite">
+        <div id="cart-status" aria-live="polite"></div>
 
-    </section>
-</main>
-
+        <section id="produto-section" class="product-grid" aria-busy="true" aria-live="polite">
+            <p>Carregando produto...</p>
+        </section>
+    </main>
+</div>
 
 <script src="js/carrinho.js"></script>
+<script src="js/catalogo.js"></script>
 
 <script>
-    (function(){
+    document.addEventListener("DOMContentLoaded", () => {
         const BRL = (n)=> 'R$ ' + Number(n||0).toFixed(2);
 
         function getParam(name){
@@ -29,68 +46,48 @@
             return url.searchParams.get(name);
         }
 
-        async function loadProdutosFromCatalogo(){
-            const res = await fetch('js/catalogo.js', {cache:'no-store'});
-            const text = await res.text();
-
-            const start = text.indexOf('const produtos =');
-            if(start === -1) throw new Error('Não encontrei definição de "const produtos =" em catalogo.js');
-
-            const after = text.slice(start);
-            const openIdx = after.indexOf('[');
-            if(openIdx === -1) throw new Error('Não encontrei "[" do array de produtos');
-
-            let i = openIdx + 1, depth = 1;
-            while (i < after.length && depth > 0){
-                const ch = after[i];
-                if(ch === '[') depth++;
-                else if(ch === ']') depth--;
-                i++;
-            }
-            if(depth !== 0) throw new Error('Falha ao balancear colchetes do array de produtos');
-
-            const arrayLiteral = after.slice(openIdx, i);
-            const produtos = Function('"use strict";return (' + arrayLiteral + ')')();
-            if(!Array.isArray(produtos)) throw new Error('Produtos extraídos não são um array');
-            return produtos;
-        }
-
         function notFound(msg){
-            document.getElementById('produto-section').innerHTML = `
-          <div>
-            <h1 tabindex="-1">${msg}</h1>
-            <p><a href="index.html" class="btn btn-outline">Voltar ao catálogo</a></p>
-          </div>`;
-            const h1 = document.querySelector('#produto-section h1'); h1 && h1.focus();
+            const sec = document.getElementById('produto-section');
+            sec.innerHTML = `
+            <div>
+                <h1 tabindex="-1">${msg}</h1>
+                <p><a href="index.html" class="btn btn-secondary">Voltar ao catálogo</a></p>
+            </div>`;
+        }
+        
+        function atualizarContadorCarrinho() {
+            const badge = document.getElementById('cart-badge');
+            if (badge && window.Cart) {
+                const totalItems = Cart.getItems().reduce((sum, item) => sum + item.quantidade, 0);
+                badge.textContent = String(totalItems);
+            }
         }
 
         function render(prod){
             const sec = document.getElementById('produto-section');
             sec.setAttribute('aria-busy','false');
             sec.innerHTML = `
-          <div>
-            <img class="img" src="${prod.imagem || ''}" alt="${prod.nome || 'Produto'}">
-          </div>
-          <div>
-            <h1 id="produto-titulo" tabindex="-1" class="produto-titulo">${prod.nome || 'Produto'}</h1>
-            <p class="produto-preco">${BRL(prod.preco)}</p>
-            <p class="produto-desc">${prod.descricao || 'Sem descrição.'}</p>
-
-            <div class="qty-wrap">
-              <label for="qty">Quantidade:</label>
-              <button type="button" id="qty-dec" aria-label="Diminuir quantidade">−</button>
-              <input id="qty" type="number" min="1" value="1" aria-label="Quantidade">
-              <button type="button" id="qty-inc" aria-label="Aumentar quantidade">+</button>
+            <div class="img-container">
+                <img class="img" src="${prod.imagem || ''}" alt="${prod.nome || 'Produto'}">
             </div>
+            <div class="details-container">
+                <h1 id="produto-titulo" class="produto-titulo">${prod.nome || 'Produto'}</h1>
+                <p class="preco">${BRL(prod.preco)}</p>
+                <p class="descricao">${prod.descricao || 'Sem descrição.'}</p>
 
-            <div class="actions-line">
-              <button id="btn-add" class="btn btn-primary">Adicionar ao carrinho</button>
-              <a href="checkout.html" class="btn btn-outline">Ir para o checkout</a>
+                <div class="qty-wrap">
+                    <label for="qty">Quantidade:</label>
+                    <button type="button" id="qty-dec" aria-label="Diminuir quantidade">−</button>
+                    <input id="qty" type="number" min="1" value="1" aria-label="Quantidade">
+                    <button type="button" id="qty-inc" aria-label="Aumentar quantidade">+</button>
+                </div>
+
+                <div class="actions-line">
+                    <button id="btn-add" class="btn">Adicionar ao carrinho</button>
+                    <a href="checkout.html" class="btn btn-secondary">Ir para o checkout</a>
+                </div>
             </div>
-          </div>
-        `;
-
-            document.getElementById('produto-titulo')?.focus();
+            `;
 
             const qty = document.getElementById('qty');
             document.getElementById('qty-inc').addEventListener('click', ()=> qty.value = String(Math.max(1, Number(qty.value||1)+1)));
@@ -98,32 +95,33 @@
 
             document.getElementById('btn-add').addEventListener('click', ()=>{
                 const quantidade = Math.max(1, Number(qty.value||1));
-                window.Cart.add({
-                    id: prod.id,
-                    nome: prod.nome,
-                    preco: Number(prod.preco||0),
-                    imagem: prod.imagem || '',
-                    quantidade
-                });
+                window.Cart.add({ ...prod, quantidade });
                 const live = document.getElementById('cart-status');
-                if(live) live.textContent = 'Produto adicionado ao carrinho.';
+                if(live) live.textContent = `"${prod.nome}" foi adicionado ao carrinho.`;
+                atualizarContadorCarrinho();
             });
         }
 
-        (async function boot(){
+        (function boot(){
             try{
                 const id = getParam('id');
                 if(!id) return notFound('Produto não informado.');
-                const lista = await loadProdutosFromCatalogo();
-                const prod = lista.find(p => String(p.id) === String(id));
+
+                // Agora usamos a variável global que foi carregada pelo catalogo.js
+                if (!window.produtos) return notFound('Lista de produtos não carregada.');
+
+                const prod = window.produtos.find(p => String(p.id) === String(id));
                 if(!prod) return notFound('Produto não encontrado.');
+                
                 render(prod);
+                atualizarContadorCarrinho();
+
             }catch(err){
                 console.error(err);
                 notFound('Falha ao carregar produto.');
             }
         })();
-    })();
+    });
 </script>
 </body>
 </html>
