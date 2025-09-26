@@ -79,6 +79,6 @@ Este projeto foi desenvolvido em colaboração por:
     * [GitHub](https://github.com/imbarbosags)
 
 * **Gabriel Carvalho**
-    * [GitHub]()
+    * [GitHub](https://github.com/VWbora2006)
 
 ---
